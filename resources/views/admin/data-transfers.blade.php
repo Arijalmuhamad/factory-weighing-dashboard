@@ -24,7 +24,8 @@
             <div class="card mb-4 shadow-sm">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-box fa-3x text-primary mr-3"></i> <!-- Menggunakan ikon yang serupa dengan FFB -->
+                        <i class="fas fa-truck fa-3x text-primary mr-3"></i>
+                        <!-- Menggunakan ikon yang serupa dengan FFB -->
                         <div>
                             <h5 class="card-title text-dark mb-2">Total Data Transaksi Transfer</h5>
                             <p class="card-text text-muted">Jumlah total data transaksi dan total netto yang tercatat dalam
