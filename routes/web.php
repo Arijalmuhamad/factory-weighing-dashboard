@@ -18,9 +18,9 @@ Route::get('/data-ffb', [DataController::class, 'getDataFFB'])->name('admin.data
 Route::get('/data-sales', [DataController::class, 'getDataSales'])->name('admin.data-sales');
 Route::get('/data-others', [DataController::class, 'getDataOthers'])->name('admin.data-others');
 Route::get('/data-current', [DataController::class, 'getDataCurrent'])->name('admin.data-current');
+Route::get('/data-transfer', [DataController::class, 'getDataTransfers'])->name('admin.data-transfer');
 
 // Rute untuk API data
 // Route::prefix('api')->group(function () {
 //     Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
 // });
-
