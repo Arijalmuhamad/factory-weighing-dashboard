@@ -16,15 +16,64 @@ class DataController extends Controller
 
     public function getDataFFB(Request $request): View
     {
-        // Mendapatkan data FFB untuk tanggal yang sesuai berdasarkan jam sekarang
-        $query_current_ffb = DB::table('wb_automation_datatbs_tab')
-            ->select('wbsid', 'driver', 'vehicleno', 'supplier', 'janjang', 'total_brondolan', 'wbin', 'wbout', 'netto_ag', 'regis_in', 'weighing_in', 'weighing_out', 'regis_out')
-            ->whereRaw('DATE(dateout) =
-            CASE
-                WHEN HOUR(NOW()) >= 7 THEN DATE(NOW())
-                ELSE DATE(NOW()) - INTERVAL 1 DAY
-            END')
-            ->paginate(5);
+        // Mengambil parameter filet status
+        $status = $request->input('status');
+
+        // Query utama transaksi FFB
+        $query = DB::table('wb_automation_datatbs_tab as a')
+            ->leftJoin('bridge_bp as b', 'a.supplier', '=', 'b.BP_CODE')
+            ->leftJoin('bridge_businessunit as c', 'a.estate', '=', 'c.PLANT')
+            ->select(
+                'a.wbsid',
+                'a.driver',
+                'a.vehicleno',
+                DB::raw("
+                    CASE
+                        WHEN a.estate = 'LUAR' THEN b.BP_NAME
+                        ELSE c.ESTNAME
+                    END AS estate_or_bp_name
+                "),
+                'a.janjang',
+                'a.total_brondolan',
+                'a.wbin',
+                'a.wbout',
+                'a.netto_ag',
+                'a.regis_in',
+                'a.weighing_in',
+                'a.weighing_out',
+                'a.regis_out'
+            )
+            ->whereRaw("
+                DATE(a.dateout) =
+                CASE
+                    WHEN HOUR(NOW()) >= 7 THEN DATE(NOW())
+                    ELSE DATE(NOW() - INTERVAL 1 DAY)
+                END
+            ");
+
+        // Filter berdasarkan status
+        if ($status === 'regin') {
+            $query->where('a.regis_in', 'T')
+                ->where('a.weighing_in', 'F')
+                ->where('a.weighing_out', 'F')
+                ->where('a.regis_out', 'F');
+        } elseif ($status === 'weighin') {
+            $query->where('a.weighing_in', 'T')
+                ->where('a.weighing_out', 'F');
+        } elseif ($status === 'weighout') {
+            $query->where('a.weighing_out', 'T')
+                ->where('a.regis_out', 'F');
+        } elseif ($status === 'regout') {
+            $query->where('a.regis_out', 'T');
+        } elseif ($status === 'nostatus') {
+            $query->where('a.regis_in', 'F')
+                ->where('a.weighing_in', 'F')
+                ->where('a.weighing_out', 'F')
+                ->where('a.regis_out', 'F');
+        }
+
+        // Pagination dengan query string supaya filter tetap saat pindah halaman
+        $query_current_ffb = $query->paginate(5)->appends($request->query());
 
         // Mendapatkan total tonase berdasarkan tanggal yang sama
         $total_tonase = DB::table('wb_automation_datatbs_tab')

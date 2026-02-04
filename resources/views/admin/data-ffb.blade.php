@@ -14,72 +14,76 @@
                     </ol>
                 </div>
             </div>
-        </div><!-- /.container-fluid -->
+        </div>
     </section>
 
     <div class="content-header">
-        <!-- Infobox for Total Data and Total Tonase -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
                     <i class="fas fa-database fa-3x text-primary mr-3"></i>
                     <div>
                         <h5 class="card-title text-dark mb-2">Total Data Transaksi FFB</h5>
-                        <p class="card-text text-muted">Jumlah total data transaksi dan total tonase yang tercatat dalam
-                            sistem.</p>
+                        <p class="card-text text-muted">
+                            Jumlah total data transaksi dan total tonase dalam sistem.
+                        </p>
                     </div>
                 </div>
+
                 <div class="text-center">
                     <h3 class="font-weight-bold">{{ $query_current_ffb->total() }}</h3>
-                    <p class="text-success">Data tersedia dalam <strong>{{ $query_current_ffb->lastPage() }}</strong>
-                        halaman.</p>
-                    <p class="text-dark font-weight-bold mt-2">Total Tonase Hari Ini: <span
-                            class="text-primary">{{ number_format($total_tonase, 2) }} Ton</span></p>
-                    <small class="text-muted mt-2">* Total tonase ini dihitung berdasarkan truck yang sudah melakukan
-                        registrasi keluar (Reg-out).</small>
+                    <p class="text-success">
+                        Data tersedia dalam <strong>{{ $query_current_ffb->lastPage() }}</strong> halaman.
+                    </p>
+                    <p class="text-dark font-weight-bold mt-2">
+                        Total Tonase Hari Ini:
+                        <span class="text-primary">{{ number_format($total_tonase, 2) }} Ton</span>
+                    </p>
+                    <small class="text-muted">* Tonase dihitung dari data yang sudah Reg-out</small>
                 </div>
             </div>
         </div>
 
-        <!-- FFB CURRENT DATA -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">FFB (Fresh Fruit Bunch)</h3>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="card-title mt-2">FFB (Fresh Fruit Bunch)</h3>
 
-                <div class="card-tools">
-                    <ul class="pagination pagination-sm float-right">
-                        <!-- Previous Page Link -->
-                        @if ($query_current_ffb->onFirstPage())
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
-                            </li>
-                        @else
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $query_current_ffb->previousPageUrl() }}">&laquo;</a>
-                            </li>
-                        @endif
+                    <div class="row align-items-center">
 
-                        <!-- Page Number Links -->
-                        @foreach ($query_current_ffb->getUrlRange(1, $query_current_ffb->lastPage()) as $page => $url)
-                            <li class="page-item {{ $page == $query_current_ffb->currentPage() ? 'active' : '' }}">
-                                <a class="page-link" href="{{ $url }}">{{ $page }}</a>
-                            </li>
-                        @endforeach
+                        <div class="col-md-auto">
+                            <form method="GET" action="" class="form-inline">
+                                <label for="status-select" class="mr-2 font-weight-bold">Status:</label>
+                                <select name="status" id="status-select" class="form-control form-control-sm"
+                                    onchange="this.form.submit()">
+                                    <option value="">-- Semua --</option>
+                                    <option value="regin" {{ request('status') == 'regin' ? 'selected' : '' }}>Reg-in
+                                    </option>
+                                    <option value="weighin" {{ request('status') == 'weighin' ? 'selected' : '' }}>Weigh-in
+                                    </option>
+                                    <option value="weighout" {{ request('status') == 'weighout' ? 'selected' : '' }}>
+                                        Weigh-out</option>
+                                    <option value="regout" {{ request('status') == 'regout' ? 'selected' : '' }}>Reg-out
+                                    </option>
+                                    <option value="nostatus" {{ request('status') == 'nostatus' ? 'selected' : '' }}>Tanpa
+                                        Status</option>
+                                </select>
+                            </form>
+                        </div>
 
-                        <!-- Next Page Link -->
-                        @if ($query_current_ffb->hasMorePages())
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $query_current_ffb->nextPageUrl() }}">&raquo;</a>
-                            </li>
-                        @else
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-disabled="true">&raquo;</a>
-                            </li>
-                        @endif
-                    </ul>
+                        <div class="col-md-auto ml-3">
+                            <span class="badge badge-primary p-2" style="font-size: 14px;">
+                                Total Data: <strong>{{ $query_current_ffb->total() }}</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-tools d-flex justify-content-end">
+                    {{ $query_current_ffb->links('pagination::bootstrap-4') }}
                 </div>
             </div>
-            <!-- /.card-header -->
+
             <div class="card-body table-responsive p-0">
                 <table class="table table-hover text-nowrap">
                     <thead>
@@ -96,48 +100,42 @@
                             <th>Status</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach ($query_current_ffb as $index => $data)
                             <tr>
-                                <td>{{ $index + 1 + ($query_current_ffb->currentPage() - 1) * 5 }}.</td>
-                                <!-- Perhitungan nomor urut -->
+                                <td>{{ $index + 1 + ($query_current_ffb->currentPage() - 1) * $query_current_ffb->perPage() }}.
+                                </td>
                                 <td>{{ $data->wbsid }}</td>
                                 <td>{{ $data->driver }}</td>
                                 <td>{{ $data->vehicleno }}</td>
-                                <td>{{ $data->supplier }}</td>
+                                <td>{{ $data->estate_or_bp_name }}</td>
                                 <td>{{ $data->janjang }}</td>
                                 <td>{{ $data->wbin }}</td>
                                 <td>{{ $data->wbout }}</td>
                                 <td>{{ $data->netto_ag }}</td>
+
                                 <td>
                                     @if ($data->regis_in == 'T' && $data->weighing_in == 'T' && $data->weighing_out == 'T' && $data->regis_out == 'T')
                                         <span class="badge bg-success">Reg-out</span>
                                     @elseif ($data->regis_in == 'T' && $data->weighing_in == 'T' && $data->weighing_out == 'T')
-                                        <span class="badge bg-warning">Weig-out</span>
+                                        <span class="badge bg-warning">Weigh-out</span>
                                     @elseif ($data->regis_in == 'T' && $data->weighing_in == 'T')
-                                        <span class="badge bg-danger">Weig-in</span>
+                                        <span class="badge bg-danger">Weigh-in</span>
                                     @elseif ($data->regis_in == 'T')
                                         <span class="badge bg-info">Reg-in</span>
                                     @else
-                                        @if ($data->regis_in == 'T')
-                                            <span class="badge bg-info">Reg-in</span>
-                                        @elseif ($data->weighing_in == 'T')
-                                            <span class="badge bg-danger">Weig-in</span>
-                                        @elseif ($data->weighing_out == 'T')
-                                            <span class="badge bg-warning">Weig-out</span>
-                                        @elseif ($data->regis_out == 'T')
-                                            <span class="badge bg-success">Reg-out</span>
-                                        @else
-                                            <span class="badge bg-secondary">No Status</span>
-                                            <!-- Default jika tidak ada status -->
-                                        @endif
+                                        <span class="badge bg-secondary">No Status</span>
                                     @endif
                                 </td>
+
                             </tr>
                         @endforeach
                     </tbody>
+
                 </table>
             </div>
+
         </div>
     </div>
 @endsection
