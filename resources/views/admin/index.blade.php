@@ -261,7 +261,7 @@
                                 </div>
                             </div>
                             <!-- Menambahkan link "More info" -->
-                            <a href="#" class="small-box-footer mt-2"
+                            <a href="{{ route('admin.data-transfer') }}" class="small-box-footer mt-2"
                                 style="text-decoration: none; color: #007bff; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; margin-top: 8px;">
                                 More info <i class="fas fa-arrow-circle-right"></i>
                             </a>
@@ -306,7 +306,7 @@
 
         // Fungsi untuk mengambil data dari server
         function fetchDashboardData() {
-            fetch('http://172.16.72.11:46/wb/dashboard/public/api/dashboard-data')
+            fetch('http://172.16.73.11:46/wb/dashboard/public/api/dashboard-data')
                 .then(response => response.json())
                 .then(data => {
                     // --- UPDATE DATA ANGKA BIASA (Registrasi & Truk) ---
